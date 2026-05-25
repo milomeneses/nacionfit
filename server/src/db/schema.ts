@@ -44,6 +44,17 @@ export const users = mysqlTable('users', {
   targetWeightKg: int('target_weight_kg'),
   targetDate: date('target_date', { mode: 'string' }),
   timezone: varchar('timezone', { length: 64 }).notNull().default('UTC'),
+  role: mysqlEnum('role', ['user', 'admin']).notNull().default('user'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const adminAuditLog = mysqlTable('admin_audit_log', {
+  id: int('id').autoincrement().primaryKey(),
+  adminUserId: int('admin_user_id').notNull(),
+  action: varchar('action', { length: 64 }).notNull(),
+  targetType: varchar('target_type', { length: 32 }).notNull(),
+  targetId: int('target_id'),
+  payload: json('payload'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
@@ -193,3 +204,4 @@ export type ConversationRow = typeof aiConversations.$inferSelect;
 export type MessageRow = typeof aiMessages.$inferSelect;
 export type WeeklyReviewRow = typeof weeklyReviews.$inferSelect;
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
+export type AdminAuditLogRow = typeof adminAuditLog.$inferSelect;

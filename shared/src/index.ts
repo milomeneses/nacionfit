@@ -1,5 +1,7 @@
 // Shared types between the NacionFit client and server.
 
+export type UserRole = 'user' | 'admin';
+
 /** A user as exposed to clients — never includes the password hash. */
 export interface User {
   id: number;
@@ -9,6 +11,7 @@ export interface User {
   targetWeightKg: number | null;
   targetDate: string | null; // ISO date (YYYY-MM-DD)
   timezone: string;
+  role: UserRole;
   createdAt: string; // ISO timestamp
 }
 
@@ -312,4 +315,58 @@ export interface WeeklyReviewSummary {
 export interface PushSubscriptionInput {
   endpoint: string;
   keys: { p256dh: string; auth: string };
+}
+
+// ----- Admin -----
+
+export interface AdminUserSummary {
+  id: number;
+  email: string;
+  name: string;
+  role: UserRole;
+  createdAt: string;
+  lastActiveAt: string | null;
+}
+
+export interface AdminUserDetail {
+  user: User;
+  counts: {
+    dailyLogs: number;
+    cravings: number;
+    conversations: number;
+    healthDays: number;
+  };
+  weightHistory: { date: string; weightKg: number }[];
+}
+
+export interface AdminUpdateUserInput {
+  name?: string;
+  targetWeightKg?: number | null;
+  targetDate?: string | null;
+  role?: UserRole;
+}
+
+export interface AdminMetrics {
+  totalUsers: number;
+  activeLast7d: number;
+  activeLast30d: number;
+  avgHabitsCompleted: number | null; // completed habits per logged day (0-6)
+  avgSleepHours: number | null;
+  avgStreak: number;
+  totalCravingsLogged: number;
+  topTriggers: { trigger: CravingTrigger; count: number }[];
+  weightLossDistribution: { bucket: string; users: number }[];
+  signupsOverTime: { week: string; count: number }[];
+  activeOverTime: { week: string; count: number }[];
+  cohortRetention: { cohort: string; size: number; retention: number[] }[];
+}
+
+export interface AuditLogEntry {
+  id: number;
+  adminUserId: number;
+  action: string;
+  targetType: string;
+  targetId: number | null;
+  payload: unknown;
+  createdAt: string;
 }

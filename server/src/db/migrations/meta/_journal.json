@@ -43,6 +43,13 @@
       "when": 1779725861846,
       "tag": "0005_noisy_grim_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1779730280444,
+      "tag": "0006_steep_omega_sentinel",
+      "breakpoints": true
     }
   ]
 }
