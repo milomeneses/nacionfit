@@ -17,9 +17,12 @@ import type {
   HabitToggleRequest,
   HealthData,
   LoginRequest,
+  PushSubscriptionInput,
   RegisterRequest,
   User,
   WebhookTokenInfo,
+  WeeklyReview,
+  WeeklyReviewSummary,
 } from '@mi-cocina/shared';
 
 const ACCESS_KEY = 'mc.accessToken';
@@ -221,6 +224,42 @@ export async function transcribeVoice(blob: Blob): Promise<string> {
   });
   if (!res.ok) throw new Error(await parseError(res));
   return ((await res.json()) as { text: string }).text;
+}
+
+export async function getReviews(): Promise<WeeklyReviewSummary[]> {
+  const res = await authFetch('/api/reviews');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WeeklyReviewSummary[];
+}
+
+export async function getReview(weekStart: string): Promise<WeeklyReview> {
+  const res = await authFetch(`/api/reviews/${weekStart}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WeeklyReview;
+}
+
+export async function markReviewRead(weekStart: string): Promise<void> {
+  await authFetch(`/api/reviews/${weekStart}/mark-read`, { method: 'POST' });
+}
+
+export async function generateReview(): Promise<WeeklyReview> {
+  const res = await authFetch('/api/reviews/generate', { method: 'POST' });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WeeklyReview;
+}
+
+export async function getVapidPublicKey(): Promise<string> {
+  const res = await fetch('/api/push/vapid-public-key');
+  if (!res.ok) throw new Error(await parseError(res));
+  return ((await res.json()) as { publicKey: string }).publicKey;
+}
+
+export async function subscribePush(sub: PushSubscriptionInput): Promise<void> {
+  const res = await authFetch('/api/push/subscribe', {
+    method: 'POST',
+    body: JSON.stringify(sub),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
 }
 
 /** POSTs a message and streams the assistant reply, calling onDelta per token. */

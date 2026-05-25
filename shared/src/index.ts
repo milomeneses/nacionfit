@@ -258,3 +258,58 @@ export interface CoachConversation {
 export interface VoiceTranscription {
   text: string;
 }
+
+// ----- Weekly review -----
+
+export interface ReviewInsight {
+  title: string;
+  body: string;
+}
+
+export interface ReviewExperiment {
+  title: string;
+  body: string;
+  success_criteria: string;
+}
+
+export interface WeeklyReviewData {
+  kgChange: number | null;
+  habitCompletion: { habitId: HabitId; rate: number }[];
+  avgSleepHours: number | null;
+  avgHrv: number | null;
+  cravingsByTrigger: { trigger: CravingTrigger; count: number }[];
+  cravingsTotal: number;
+  variance: number | null;
+  highStressDays: number;
+  previousWeeks: {
+    weekStart: string;
+    kgChange: number | null;
+    avgSleepHours: number | null;
+    cravingsTotal: number;
+    habitRate: number | null;
+  }[];
+}
+
+export interface WeeklyReview {
+  weekStart: string; // YYYY-MM-DD (Monday)
+  weekEnd: string; // YYYY-MM-DD (Sunday)
+  narrative: string;
+  insights: ReviewInsight[];
+  experiment: ReviewExperiment;
+  data: WeeklyReviewData;
+  generatedAt: string;
+  readAt: string | null;
+}
+
+export interface WeeklyReviewSummary {
+  weekStart: string;
+  weekEnd: string;
+  narrative: string;
+  generatedAt: string;
+  readAt: string | null;
+}
+
+export interface PushSubscriptionInput {
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+}

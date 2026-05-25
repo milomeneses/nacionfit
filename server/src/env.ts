@@ -29,4 +29,14 @@ export const env = {
     chatModel: 'llama-3.3-70b-versatile',
     whisperModel: 'whisper-large-v3',
   },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY ?? '',
+    baseUrl: process.env.GEMINI_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta',
+    model: 'gemini-2.0-flash',
+  },
+  vapid: {
+    publicKey: process.env.VAPID_PUBLIC_KEY ?? '',
+    privateKey: process.env.VAPID_PRIVATE_KEY ?? '',
+    subject: process.env.VAPID_SUBJECT ?? 'mailto:hola@mi-cocina.app',
+  },
 } as const;

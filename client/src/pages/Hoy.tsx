@@ -7,7 +7,7 @@ import type {
   Meals,
   ProjectIntensity,
 } from '@mi-cocina/shared';
-import { getDay, getDays, getHealthMe, putDay, toggleHabit } from '../lib/api';
+import { getDay, getDays, getHealthMe, getReviews, putDay, toggleHabit } from '../lib/api';
 import { computeStreak, daysAgoStr, formatLongEs, todayStr } from '../lib/date';
 import { fmtSleep } from '../lib/health';
 import {
@@ -55,6 +55,7 @@ export function Hoy() {
   const [savedDates, setSavedDates] = useState<Set<string>>(new Set());
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [todayHealth, setTodayHealth] = useState<HealthData | null>(null);
+  const [unreadReview, setUnreadReview] = useState<string | null>(null);
 
   const metricsRef = useRef(metrics);
   useEffect(() => {
@@ -102,10 +103,11 @@ export function Hoy() {
     let active = true;
     (async () => {
       try {
-        const [day, range, health] = await Promise.all([
+        const [day, range, health, reviews] = await Promise.all([
           getDay(today),
           getDays(daysAgoStr(120), today),
           getHealthMe().catch(() => [] as HealthData[]),
+          getReviews().catch(() => []),
         ]);
         if (!active) return;
         if (day) {
@@ -125,6 +127,7 @@ export function Hoy() {
         if (day?.savedAt) saved.add(today);
         setSavedDates(saved);
         setTodayHealth(health.find((h) => h.date === today) ?? null);
+        setUnreadReview(reviews.find((r) => !r.readAt)?.weekStart ?? null);
       } finally {
         if (active) setLoading(false);
       }
@@ -198,6 +201,20 @@ export function Hoy() {
       </div>
 
       <div className="space-y-5">
+        {unreadReview && (
+          <Link
+            to={`/app/reviews/${unreadReview}`}
+            className="block rounded-2xl border border-terra/40 bg-terra-pale p-5 transition hover:border-terra"
+          >
+            <p className="font-display text-lg italic text-terra">
+              Tu review de la semana está listo
+            </p>
+            <p className="mt-1 font-body text-sm text-ink/70">
+              Tocá para ver tus 3 patrones y el experimento de esta semana.
+            </p>
+          </Link>
+        )}
+
         <Card em="Apple Watch">
           {todayHealth ? (
             <div className="grid grid-cols-3 gap-3 text-center">

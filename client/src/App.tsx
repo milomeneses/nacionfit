@@ -10,6 +10,7 @@ import { Ajustes } from './pages/Ajustes';
 import { Antojos } from './pages/Antojos';
 import { Patrones } from './pages/Patrones';
 import { Coach } from './pages/Coach';
+import { Reviews } from './pages/Reviews';
 import { Tools } from './pages/Tools';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -50,6 +51,8 @@ export default function App() {
         <Route path="patrones" element={<Patrones />} />
         <Route path="sueno" element={<Sueno />} />
         <Route path="coach" element={<Coach />} />
+        <Route path="reviews" element={<Reviews />} />
+        <Route path="reviews/:weekStart" element={<Reviews />} />
         <Route path="tools" element={<Tools />} />
         <Route path="settings" element={<Ajustes />} />
       </Route>

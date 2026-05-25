@@ -20,6 +20,9 @@ import type {
   HabitId,
   Meals,
   ProjectIntensity,
+  ReviewExperiment,
+  ReviewInsight,
+  WeeklyReviewData,
 } from '@mi-cocina/shared';
 
 export const PROJECT_INTENSITIES = ['low', 'medium', 'high', 'crisis'] as const;
@@ -152,6 +155,32 @@ export const aiMessages = mysqlTable('ai_messages', {
   tokensUsed: int('tokens_used'),
 });
 
+export const weeklyReviews = mysqlTable(
+  'weekly_reviews',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    userId: int('user_id').notNull(),
+    weekStart: date('week_start', { mode: 'string' }).notNull(),
+    weekEnd: date('week_end', { mode: 'string' }).notNull(),
+    narrative: text('narrative'),
+    insights: json('insights').$type<ReviewInsight[]>(),
+    experiment: json('experiment').$type<ReviewExperiment>(),
+    rawData: json('raw_data').$type<WeeklyReviewData>(),
+    generatedAt: timestamp('generated_at').notNull().defaultNow(),
+    readAt: timestamp('read_at'),
+  },
+  (t) => [unique('weekly_reviews_user_week_unique').on(t.userId, t.weekStart)],
+);
+
+export const pushSubscriptions = mysqlTable('push_subscriptions', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  endpoint: varchar('endpoint', { length: 512 }).notNull().unique(),
+  p256dh: varchar('p256dh', { length: 255 }).notNull(),
+  auth: varchar('auth', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 export type UserRow = typeof users.$inferSelect;
 export type NewUserRow = typeof users.$inferInsert;
 export type DailyLogRow = typeof dailyLogs.$inferSelect;
@@ -162,3 +191,5 @@ export type WebhookTokenRow = typeof userWebhookTokens.$inferSelect;
 export type CravingRow = typeof cravings.$inferSelect;
 export type ConversationRow = typeof aiConversations.$inferSelect;
 export type MessageRow = typeof aiMessages.$inferSelect;
+export type WeeklyReviewRow = typeof weeklyReviews.$inferSelect;
+export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;

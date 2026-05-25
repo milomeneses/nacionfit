@@ -45,6 +45,8 @@ cp .env.example server/.env
 | `JWT_REFRESH_SECRET` | Secret for signing 30-day refresh tokens     |
 | `PORT`               | Server port (defaults to `3001`)             |
 | `GROQ_API_KEY`       | Groq key for the AI coach + Whisper voice (free at console.groq.com) |
+| `GEMINI_API_KEY`     | Gemini key for the weekly review (free at aistudio.google.com) |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web Push keys (`npx web-push generate-vapid-keys`) |
 
 > Connecting to Hostinger MySQL: use the host, database, and user shown in
 > hPanel → Databases. Make sure your IP is allowed under "Remote MySQL", then
@@ -82,6 +84,9 @@ Migrations so far create:
   meal, HRV, week count, consecutive high-stress days).
 - `ai_conversations` / `ai_messages` — AI coach chat history; conversations carry
   an optional 2-sentence `summary` used as memory in later chats.
+- `weekly_reviews` — one Gemini-generated review per user/week: `narrative`,
+  `insights` JSON, `experiment` JSON, `raw_data` JSON snapshot, `read_at`.
+- `push_subscriptions` — Web Push (VAPID) subscriptions per user/device.
 
 ## Running locally
 
@@ -218,6 +223,30 @@ without it the chat/voice endpoints return `503`.
   10+ messages it generates a 2-sentence `summary` (best-effort).
 - `GROQ_BASE_URL` can override the API origin (used to test against a mock).
 
+## Weekly Review API (Gemini) + Web Push
+
+Generates a Sunday-evening weekly review with Gemini (`gemini-2.0-flash`).
+`Authorization: Bearer`-gated except the VAPID key endpoint. Needs `GEMINI_API_KEY`
+(chat) and `VAPID_*` (push); both degrade gracefully when unset.
+
+| Method | Path                              | Purpose                                       |
+| ------ | --------------------------------- | --------------------------------------------- |
+| POST   | `/api/reviews/generate`           | generate the current user's last completed week |
+| GET    | `/api/reviews`                    | list reviews, newest first                    |
+| GET    | `/api/reviews/:week_start`        | full review (narrative, insights, experiment) |
+| POST   | `/api/reviews/:week_start/mark-read` | mark a review read                          |
+| GET    | `/api/push/vapid-public-key`      | the browser's VAPID public key                |
+| POST   | `/api/push/subscribe`             | store a Web Push subscription                 |
+
+- `reviewService.gatherWeeklyData()` compiles the week (kg change, per-habit
+  completion, avg sleep/HRV, cravings by trigger, variance, high-stress days) plus
+  a 3-week comparison. `generateReview()` prompts Gemini (JSON mode) for exactly 3
+  data-specific insights and 1 experiment with success criteria, in Argentine
+  Spanish, and upserts by `(user_id, week_start)`.
+- A `node-cron` job (Sun 19:00 server time) generates reviews for recently-active
+  users — each in their own timezone — and sends a Web Push notification.
+- `GEMINI_BASE_URL` can override the API origin (used to test against a mock).
+
 ## Front end
 
 - `/login` and `/register` — auth screens.
@@ -245,6 +274,11 @@ without it the chat/voice endpoints return `503`.
   conversations menu listing past summaries.
 - `/app/sueno` — **Sueño & Recuperación**: last night's sleep-stage breakdown,
   a 7-day sleep bar chart, and HRV / resting-HR trend lines (SVG, no chart lib).
+- `/app/reviews` (+ `/app/reviews/:weekStart`) — **Review semanal**: a hero
+  narrative in Fraunces italic, a kg/habits/variance stat row, three numbered
+  insight cards, a green-pale experiment card, and a list of past reviews. Hoy
+  shows a terra banner linking here when a review is unread; an "Activar avisos"
+  button registers the service worker and Web Push subscription.
 - `/app/tools` — **Tools**: placeholder for the 20-minute urge-surfing timer.
 - `/app/settings` — **Ajustes**: the webhook URL with a copy button, last-sync
   time, Health Auto Export setup steps, and a regenerate-token action.
