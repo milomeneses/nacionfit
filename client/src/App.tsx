@@ -7,6 +7,8 @@ import { AppLayout } from './components/AppLayout';
 import { Hoy } from './pages/Hoy';
 import { Sueno } from './pages/Sueno';
 import { Ajustes } from './pages/Ajustes';
+import { Antojos } from './pages/Antojos';
+import { Tools } from './pages/Tools';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -42,7 +44,9 @@ export default function App() {
         }
       >
         <Route index element={<Hoy />} />
+        <Route path="antojos" element={<Antojos />} />
         <Route path="sueno" element={<Sueno />} />
+        <Route path="tools" element={<Tools />} />
         <Route path="settings" element={<Ajustes />} />
       </Route>
       <Route path="*" element={<Navigate to="/app" replace />} />

@@ -1,5 +1,9 @@
 import type {
   AuthResponse,
+  Craving,
+  CravingContext,
+  CravingStats,
+  CreateCravingRequest,
   DailyLog,
   DailyLogInput,
   HabitLog,
@@ -125,4 +129,31 @@ export async function regenerateHealthToken(): Promise<WebhookTokenInfo> {
   const res = await authFetch('/api/health/token', { method: 'POST' });
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as WebhookTokenInfo;
+}
+
+export async function getCravingContext(): Promise<CravingContext> {
+  const res = await authFetch('/api/cravings/context');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as CravingContext;
+}
+
+export async function createCraving(body: CreateCravingRequest): Promise<Craving> {
+  const res = await authFetch('/api/cravings', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Craving;
+}
+
+export async function getCravings(limit = 20): Promise<Craving[]> {
+  const res = await authFetch(`/api/cravings?limit=${limit}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Craving[];
+}
+
+export async function getCravingStats(): Promise<CravingStats> {
+  const res = await authFetch('/api/cravings/stats');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as CravingStats;
 }

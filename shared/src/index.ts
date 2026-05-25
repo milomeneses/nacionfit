@@ -126,3 +126,61 @@ export interface WebhookTokenInfo {
   token: string;
   lastSyncAt: string | null;
 }
+
+// ----- Cravings -----
+
+export type CravingTrigger =
+  | 'estres'
+  | 'cansancio'
+  | 'aburrimiento'
+  | 'hambre'
+  | 'vista'
+  | 'social'
+  | 'emocion'
+  | 'otro';
+
+export type CravingAction =
+  | 'cedi'
+  | 'cedi_planeado'
+  | 'porcion_chica'
+  | 'redirigi'
+  | 'espere'
+  | 'agua_prot';
+
+/** Vulnerability snapshot computed server-side when a craving is logged. */
+export interface CravingContext {
+  hoursSinceLastMeal: number | null;
+  sleepHoursLastNight: number | null;
+  hrvYesterday: number | null;
+  projectIntensityToday: ProjectIntensity | null;
+  cravingsCountThisWeek: number;
+  consecutiveHighStressDays: number;
+}
+
+export interface Craving {
+  id: number;
+  timestamp: string; // ISO
+  food: string;
+  intensity: number; // 1-10
+  trigger: CravingTrigger;
+  action: CravingAction;
+  note: string | null;
+  context: CravingContext | null;
+}
+
+export interface CreateCravingRequest {
+  food: string;
+  intensity: number;
+  trigger: CravingTrigger;
+  action: CravingAction;
+  note?: string | null;
+  timestamp?: string; // optional ISO; defaults to server now
+}
+
+export interface CravingStats {
+  total: number;
+  countLast7d: number;
+  managedPct: number; // 0-100, share of actions != 'cedi'
+  topTrigger: { trigger: CravingTrigger; count: number } | null;
+  topFood: { food: string; count: number } | null;
+}

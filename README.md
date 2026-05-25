@@ -75,6 +75,10 @@ Migrations so far create:
   minutes), `hrv_ms`, `resting_hr`, `steps`, `active_calories`, `source`,
   `synced_at`, with `UNIQUE(user_id, date)`.
 - `user_webhook_tokens` — per-user secret `token` (UNIQUE) + `last_sync_at`.
+- `cravings` — logged cravings: `timestamp`, `food`, `intensity` (1–10),
+  `trigger` (enum), `action` (enum), `note`, and a `context` JSON snapshot of the
+  user's vulnerability at the moment (sleep, project intensity, hours since last
+  meal, HRV, week count, consecutive high-stress days).
 
 ## Running locally
 
@@ -154,16 +158,45 @@ case/spacing-insensitively:
 Each day is upserted by `(user_id, date)`, **merging** only the fields present in
 the payload (a partial sync never wipes existing metrics).
 
+## Cravings API
+
+All endpoints require `Authorization: Bearer <token>`.
+
+| Method | Path                      | Body / Query                                   | Returns                       |
+| ------ | ------------------------- | ---------------------------------------------- | ----------------------------- |
+| POST   | `/api/cravings`           | `{ food, intensity, trigger, action, note? }`  | created craving (with context) |
+| GET    | `/api/cravings?limit=20`  | `limit` (1–100)                                | recent cravings, newest first |
+| GET    | `/api/cravings/stats`     | —                                              | `{ total, countLast7d, managedPct, topTrigger, topFood }` |
+| GET    | `/api/cravings/context`   | —                                              | the current vulnerability context |
+
+- On create, the server snapshots a `context` by joining `daily_logs` and
+  `health_data` for the user's timezone: sleep last night, HRV yesterday, project
+  intensity today, hours since last meal, cravings this week, and consecutive
+  high-stress days. `% managed` counts actions other than `cedi`.
+- **Hours since last meal** is an estimate: `daily_logs.meals` has no timestamps,
+  so each filled meal slot is mapped to a typical local hour
+  (desayuno 08 / almuerzo 13 / snacks 17 / cena 21) and compared to the current
+  time in the user's timezone.
+
 ## Front end
 
 - `/login` and `/register` — auth screens.
 - `/app` — the **"Hoy"** screen: today's daily log. A persistent tab bar
-  (Hoy / Coach / Patrones / Plan / Sueño) and top bar (with an **Ajustes** link)
-  wrap every `/app` view. Hoy shows the Argentine-Spanish date, a streak counter,
-  an **Apple Watch** card (today's sleep / HRV / steps, or a prompt to connect),
-  then comidas, agua, estrés, ánimo, CrossFit (+energy), peso and hábitos cards.
+  (Hoy / Antojos / Sueño / Tools / Coach / Patrones / Plan) and top bar (with an
+  **Ajustes** link) wrap every `/app` view. Hoy shows the Argentine-Spanish date,
+  a streak counter, an **Apple Watch** card (today's sleep / HRV / steps, or a
+  prompt to connect), then comidas, agua, estrés, ánimo, CrossFit (+energy), peso
+  and hábitos cards.
+- `/app/antojos` — **Antojos**, with two states (toggle "Ahora" / "Historial").
+  *Ahora*: a "Protocolo 5 minutos" card (links to the urge-surfing timer), a
+  live "Contexto de hoy" card that turns values terra in the risk zone (sleep
+  <6h, project high/crisis, ≥4h since eating, ≥5 cravings this week), and a quick
+  log form (food, 1–10 intensity dots, trigger, action, note). *Historial*: a
+  collapsible "Tu patrón" summary (shown at ≥5 cravings) and the list of past
+  cravings.
 - `/app/sueno` — **Sueño & Recuperación**: last night's sleep-stage breakdown,
   a 7-day sleep bar chart, and HRV / resting-HR trend lines (SVG, no chart lib).
+- `/app/tools` — **Tools**: placeholder for the 20-minute urge-surfing timer.
 - `/app/settings` — **Ajustes**: the webhook URL with a copy button, last-sync
   time, Health Auto Export setup steps, and a regenerate-token action.
 - Edits **auto-save 1s after the last change** (debounced); habits toggle

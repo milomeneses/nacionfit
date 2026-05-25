@@ -3,15 +3,24 @@ import {
   int,
   varchar,
   date,
+  datetime,
   timestamp,
   json,
   tinyint,
   boolean,
   decimal,
+  text,
   mysqlEnum,
   unique,
 } from 'drizzle-orm/mysql-core';
-import type { HabitId, Meals, ProjectIntensity } from '@mi-cocina/shared';
+import type {
+  CravingAction,
+  CravingContext,
+  CravingTrigger,
+  HabitId,
+  Meals,
+  ProjectIntensity,
+} from '@mi-cocina/shared';
 
 export const PROJECT_INTENSITIES = ['low', 'medium', 'high', 'crisis'] as const;
 export const HABIT_IDS = [
@@ -94,6 +103,38 @@ export const userWebhookTokens = mysqlTable('user_webhook_tokens', {
   lastSyncAt: timestamp('last_sync_at'),
 });
 
+export const CRAVING_TRIGGERS = [
+  'estres',
+  'cansancio',
+  'aburrimiento',
+  'hambre',
+  'vista',
+  'social',
+  'emocion',
+  'otro',
+] as const satisfies readonly CravingTrigger[];
+
+export const CRAVING_ACTIONS = [
+  'cedi',
+  'cedi_planeado',
+  'porcion_chica',
+  'redirigi',
+  'espere',
+  'agua_prot',
+] as const satisfies readonly CravingAction[];
+
+export const cravings = mysqlTable('cravings', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  timestamp: datetime('timestamp', { mode: 'date' }).notNull(),
+  food: varchar('food', { length: 120 }).notNull(),
+  intensity: tinyint('intensity').notNull(),
+  trigger: mysqlEnum('trigger', CRAVING_TRIGGERS).$type<CravingTrigger>().notNull(),
+  action: mysqlEnum('action', CRAVING_ACTIONS).$type<CravingAction>().notNull(),
+  note: text('note'),
+  context: json('context').$type<CravingContext>(),
+});
+
 export type UserRow = typeof users.$inferSelect;
 export type NewUserRow = typeof users.$inferInsert;
 export type DailyLogRow = typeof dailyLogs.$inferSelect;
@@ -101,3 +142,4 @@ export type HabitLogRow = typeof habitsLogs.$inferSelect;
 export type HealthDataRow = typeof healthData.$inferSelect;
 export type HealthDataInsert = typeof healthData.$inferInsert;
 export type WebhookTokenRow = typeof userWebhookTokens.$inferSelect;
+export type CravingRow = typeof cravings.$inferSelect;

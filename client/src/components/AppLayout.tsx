@@ -9,10 +9,12 @@ interface TabDef {
 
 const TABS: TabDef[] = [
   { label: 'Hoy', to: '/app', end: true },
+  { label: 'Antojos', to: '/app/antojos' },
+  { label: 'Sueño', to: '/app/sueno' },
+  { label: 'Tools', to: '/app/tools' },
   { label: 'Coach' },
   { label: 'Patrones' },
   { label: 'Plan' },
-  { label: 'Sueño', to: '/app/sueno' },
 ];
 
 const tabBase = '-mb-px border-b-2 px-4 py-2 font-body text-sm transition whitespace-nowrap';

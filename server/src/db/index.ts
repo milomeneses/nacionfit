@@ -10,6 +10,8 @@ export const pool = mysql.createPool({
   password: env.db.password,
   database: env.db.database,
   connectionLimit: 10,
+  // Interpret all DATETIME/TIMESTAMP values as UTC for deterministic round-trips.
+  timezone: 'Z',
 });
 
 export const db = drizzle(pool, { schema, mode: 'default' });
