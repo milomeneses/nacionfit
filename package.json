@@ -1,0 +1,26 @@
+{
+  "name": "mi-cocina",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mi Cocina monorepo: React client, Express server, shared types",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:server dev:client",
+    "dev:client": "npm run dev --workspace client",
+    "dev:server": "npm run dev --workspace server",
+    "build": "npm run build --workspace shared && npm run build --workspace server && npm run build --workspace client",
+    "db:generate": "npm run db:generate --workspace server",
+    "db:migrate": "npm run db:migrate --workspace server"
+  },
+  "devDependencies": {
+    "drizzle-orm": "^0.45.2",
+    "npm-run-all": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

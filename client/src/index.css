@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #F4EFE3;
+  --surface: #FBF7EC;
+  --ink: #1E2A1E;
+  --green: #2D4A33;
+  --terra: #B45A36;
+  --sun: #C9962B;
+  --green-pale: #D8E2D4;
+  --terra-pale: #F2DECA;
+  --line: #DDD3BC;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
