@@ -178,6 +178,19 @@ All endpoints require `Authorization: Bearer <token>`.
   (desayuno 08 / almuerzo 13 / snacks 17 / cena 21) and compared to the current
   time in the user's timezone.
 
+## Patterns API
+
+Pure aggregations (no new tables), all `Authorization: Bearer`-gated, computed in
+the user's timezone.
+
+| Method | Path                                      | Returns                                            |
+| ------ | ----------------------------------------- | -------------------------------------------------- |
+| GET    | `/api/patterns/cravings-heatmap?weeks=6`  | 7×5 grid (day × time block) + peak "hora roja"     |
+| GET    | `/api/patterns/sleep-vs-cravings?weeks=8` | avg craving intensity per prior-night sleep bucket |
+| GET    | `/api/patterns/variance?weeks=6`          | weekly habit completion: weekday vs weekend + variance |
+| GET    | `/api/patterns/top-triggers?weeks=8`      | trigger frequency, ranked                          |
+| GET    | `/api/patterns/stress-cravings?weeks=6`   | cravings/day on high/crisis vs low/medium days     |
+
 ## Front end
 
 - `/login` and `/register` — auth screens.
@@ -194,6 +207,11 @@ All endpoints require `Authorization: Bearer <token>`.
   log form (food, 1–10 intensity dots, trigger, action, note). *Historial*: a
   collapsible "Tu patrón" summary (shown at ≥5 cravings) and the list of past
   cravings.
+- `/app/patrones` — **Patrones**: needs ≥14 logged days (otherwise a Fraunces
+  empty state counting down to day 14). Shows a cravings heatmap (surface→terra,
+  highlighting the "hora roja"), a sleep-vs-craving-intensity bar chart, a weekly
+  variance trend with a 0.15 goal line, and a stress×cravings comparison — each
+  with commentary derived from the actual numbers.
 - `/app/sueno` — **Sueño & Recuperación**: last night's sleep-stage breakdown,
   a 7-day sleep bar chart, and HRV / resting-HR trend lines (SVG, no chart lib).
 - `/app/tools` — **Tools**: placeholder for the 20-minute urge-surfing timer.

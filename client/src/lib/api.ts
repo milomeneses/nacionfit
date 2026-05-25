@@ -2,8 +2,13 @@ import type {
   AuthResponse,
   Craving,
   CravingContext,
+  CravingsHeatmap,
   CravingStats,
   CreateCravingRequest,
+  SleepVsCravings,
+  StressCravings,
+  TopTriggersResult,
+  VarianceTrend,
   DailyLog,
   DailyLogInput,
   HabitLog,
@@ -156,4 +161,34 @@ export async function getCravingStats(): Promise<CravingStats> {
   const res = await authFetch('/api/cravings/stats');
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as CravingStats;
+}
+
+export async function getCravingsHeatmap(weeks = 6): Promise<CravingsHeatmap> {
+  const res = await authFetch(`/api/patterns/cravings-heatmap?weeks=${weeks}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as CravingsHeatmap;
+}
+
+export async function getSleepVsCravings(weeks = 8): Promise<SleepVsCravings> {
+  const res = await authFetch(`/api/patterns/sleep-vs-cravings?weeks=${weeks}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as SleepVsCravings;
+}
+
+export async function getVariance(weeks = 6): Promise<VarianceTrend> {
+  const res = await authFetch(`/api/patterns/variance?weeks=${weeks}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as VarianceTrend;
+}
+
+export async function getTopTriggers(weeks = 8): Promise<TopTriggersResult> {
+  const res = await authFetch(`/api/patterns/top-triggers?weeks=${weeks}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as TopTriggersResult;
+}
+
+export async function getStressCravings(weeks = 6): Promise<StressCravings> {
+  const res = await authFetch(`/api/patterns/stress-cravings?weeks=${weeks}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as StressCravings;
 }

@@ -10,10 +10,10 @@ interface TabDef {
 const TABS: TabDef[] = [
   { label: 'Hoy', to: '/app', end: true },
   { label: 'Antojos', to: '/app/antojos' },
+  { label: 'Patrones', to: '/app/patrones' },
   { label: 'Sueño', to: '/app/sueno' },
   { label: 'Tools', to: '/app/tools' },
   { label: 'Coach' },
-  { label: 'Patrones' },
   { label: 'Plan' },
 ];
 

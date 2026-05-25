@@ -184,3 +184,55 @@ export interface CravingStats {
   topTrigger: { trigger: CravingTrigger; count: number } | null;
   topFood: { food: string; count: number } | null;
 }
+
+// ----- Patterns (aggregations) -----
+
+export interface CravingsHeatmap {
+  weeks: number;
+  dayLabels: string[]; // 7, Mon-first
+  blockLabels: string[]; // 5 time blocks
+  grid: number[][]; // [7 days][5 blocks] counts
+  total: number;
+  peak: { dayIndex: number; blockIndex: number; count: number } | null;
+}
+
+export interface SleepCravingsBucket {
+  label: string; // "<5h", "5-6", ...
+  count: number;
+  avgIntensity: number | null;
+}
+
+export interface SleepVsCravings {
+  weeks: number;
+  buckets: SleepCravingsBucket[]; // 6
+}
+
+export interface VarianceWeek {
+  weekStart: string; // YYYY-MM-DD (Monday)
+  weekdayAvg: number | null; // 0-1 habit completion Mon-Fri
+  weekendAvg: number | null; // 0-1 Sat-Sun
+  variance: number | null; // abs diff
+}
+
+export interface VarianceTrend {
+  weeks: number;
+  goal: number; // 0.15
+  series: VarianceWeek[];
+}
+
+export interface TopTriggersResult {
+  weeks: number;
+  triggers: { trigger: CravingTrigger; count: number }[];
+}
+
+export interface StressCravingsGroup {
+  days: number;
+  cravings: number;
+  avgPerDay: number;
+}
+
+export interface StressCravings {
+  weeks: number;
+  high: StressCravingsGroup; // project_intensity high|crisis
+  low: StressCravingsGroup; // low|medium
+}
