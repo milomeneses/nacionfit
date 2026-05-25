@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './lib/auth';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
-import { Dashboard } from './pages/Dashboard';
+import { Hoy } from './pages/Hoy';
 import type { ReactNode } from 'react';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -34,7 +34,7 @@ export default function App() {
         path="/app"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <Hoy />
           </ProtectedRoute>
         }
       />

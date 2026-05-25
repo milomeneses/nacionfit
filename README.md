@@ -62,9 +62,15 @@ npm run db:generate
 npm run db:migrate
 ```
 
-The initial migration creates the `users` table:
-`id, email, password_hash, name, height_cm, target_weight_kg, target_date,
-timezone, created_at`.
+Migrations so far create:
+
+- `users` — `id, email, password_hash, name, height_cm, target_weight_kg,
+  target_date, timezone, created_at`.
+- `daily_logs` — one row per user per day: `meals` (JSON), `water_count`,
+  `sleep_hours`, `mood`, `crossfit`, `energy`, `stress`, `project_intensity`
+  (enum), `weight_kg`, `saved_at`, with `UNIQUE(user_id, date)`.
+- `habits_logs` — `habit_id` (enum) + `completed` per user/day, with
+  `UNIQUE(user_id, date, habit_id)`.
 
 ## Running locally
 
@@ -101,11 +107,37 @@ All endpoints are mounted under `/api/auth`.
 - Passwords are hashed with bcrypt.
 - Access tokens expire in **7 days**, refresh tokens in **30 days**.
 
+## Daily logging API
+
+All endpoints require `Authorization: Bearer <token>` and act on the logged-in
+user only. Dates are `YYYY-MM-DD`.
+
+| Method | Path                       | Body / Query                                  | Returns                         |
+| ------ | -------------------------- | --------------------------------------------- | ------------------------------- |
+| GET    | `/api/days/:date`          | —                                             | the day (with `habits`) or `null` |
+| PUT    | `/api/days/:date`          | partial `DailyLog` (Zod-validated)            | the upserted day                |
+| GET    | `/api/days?from=&to=`      | `from`, `to` dates                            | array of saved days in range    |
+| POST   | `/api/habits/toggle`       | `{ date, habitId, completed }`                | the toggled habit               |
+
+- `daily_logs` is keyed `UNIQUE(user_id, date)`; `PUT` upserts and stamps
+  `saved_at`. `habits_logs` is keyed `UNIQUE(user_id, date, habit_id)`.
+- A day's response merges its `daily_logs` row with a `habits` map of all six
+  habit ids → completed.
+
 ## Front end
 
 - `/login` and `/register` — auth screens.
-- `/app` — the authenticated dashboard (shows your email; empty otherwise).
-  Unauthenticated visits redirect to `/login`.
+- `/app` — the **"Hoy"** screen: today's daily log. Header shows the date in
+  Argentine Spanish and a streak counter; a tab bar (Hoy / Coach / Patrones /
+  Plan, only Hoy implemented) sits above the cards.
+- Cards: comidas (4 meals), agua (8-vaso picker), estrés (bajo/medio/alto/crisis),
+  ánimo (5 levels), CrossFit (reveals an energy 1–5 picker when on), peso (kg,
+  optional) and hábitos (6-item checklist).
+- Edits **auto-save 1s after the last change** (debounced) via `PUT /api/days/:date`;
+  habits toggle immediately via `POST /api/habits/toggle`. A subtle "Guardado"
+  indicator fades in on save.
+- **Streak**: consecutive days back from today with `saved_at` set. An unsaved
+  *today* does not break the streak (it's measured from yesterday in that case).
 
 Tokens are stored in `localStorage`; on load the app calls `/api/auth/me` to
 restore the session.

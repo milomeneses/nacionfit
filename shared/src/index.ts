@@ -44,3 +44,64 @@ export interface AuthResponse extends AuthTokens {
 export interface ErrorResponse {
   error: string;
 }
+
+// ----- Daily logging -----
+
+export type ProjectIntensity = 'low' | 'medium' | 'high' | 'crisis';
+
+/** Canonical habit identifiers. The contract shared by client and server. */
+export type HabitId =
+  | 'meditacion'
+  | 'lectura'
+  | 'estiramiento'
+  | 'sin_azucar'
+  | 'suplementos'
+  | 'pasos';
+
+export interface Meals {
+  desayuno: string;
+  almuerzo: string;
+  cena: string;
+  snacks: string;
+}
+
+/** A single day's log, merged with that day's habit completion map. */
+export interface DailyLog {
+  date: string; // YYYY-MM-DD
+  meals: Meals | null;
+  waterCount: number | null;
+  sleepHours: number | null;
+  mood: number | null;
+  crossfit: boolean | null;
+  energy: number | null;
+  stress: number | null;
+  projectIntensity: ProjectIntensity | null;
+  weightKg: number | null;
+  savedAt: string | null; // ISO timestamp, null if the day was never saved
+  habits: Record<HabitId, boolean>;
+}
+
+/** Upsert body for PUT /api/days/:date. All fields optional (partial save). */
+export interface DailyLogInput {
+  meals?: Meals | null;
+  waterCount?: number | null;
+  sleepHours?: number | null;
+  mood?: number | null;
+  crossfit?: boolean | null;
+  energy?: number | null;
+  stress?: number | null;
+  projectIntensity?: ProjectIntensity | null;
+  weightKg?: number | null;
+}
+
+export interface HabitToggleRequest {
+  date: string;
+  habitId: HabitId;
+  completed: boolean;
+}
+
+export interface HabitLog {
+  date: string;
+  habitId: HabitId;
+  completed: boolean;
+}

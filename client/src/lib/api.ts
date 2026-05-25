@@ -1,5 +1,9 @@
 import type {
   AuthResponse,
+  DailyLog,
+  DailyLogInput,
+  HabitLog,
+  HabitToggleRequest,
   LoginRequest,
   RegisterRequest,
   User,
@@ -58,10 +62,47 @@ export async function login(body: LoginRequest): Promise<AuthResponse> {
   return data;
 }
 
+async function authFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${tokenStore.access ?? ''}`,
+    ...(init.headers as Record<string, string> | undefined),
+  };
+  if (init.body) headers['Content-Type'] = 'application/json';
+  return fetch(path, { ...init, headers });
+}
+
 export async function fetchMe(): Promise<User> {
-  const res = await fetch('/api/auth/me', {
-    headers: { Authorization: `Bearer ${tokenStore.access ?? ''}` },
-  });
+  const res = await authFetch('/api/auth/me');
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as User;
+}
+
+export async function getDay(date: string): Promise<DailyLog | null> {
+  const res = await authFetch(`/api/days/${date}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as DailyLog | null;
+}
+
+export async function putDay(date: string, input: DailyLogInput): Promise<DailyLog> {
+  const res = await authFetch(`/api/days/${date}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as DailyLog;
+}
+
+export async function getDays(from: string, to: string): Promise<DailyLog[]> {
+  const res = await authFetch(`/api/days?from=${from}&to=${to}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as DailyLog[];
+}
+
+export async function toggleHabit(body: HabitToggleRequest): Promise<HabitLog> {
+  const res = await authFetch('/api/habits/toggle', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as HabitLog;
 }
