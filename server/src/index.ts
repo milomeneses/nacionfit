@@ -1,3 +1,5 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import { env } from './env.js';
@@ -30,6 +32,20 @@ app.use('/api/patterns', patternsRoutes);
 app.use('/api/coach', coachRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/push', pushRoutes);
+
+// In production, serve the built client and let React Router handle routing.
+// Must come AFTER all /api routes so the catch-all doesn't shadow them.
+if (process.env.NODE_ENV === 'production') {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const clientDist = path.resolve(__dirname, '../../client/dist');
+
+  app.use(express.static(clientDist));
+
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
 
 app.listen(env.port, () => {
   console.log(`Server listening on http://localhost:${env.port}`);
