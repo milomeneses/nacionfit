@@ -44,6 +44,7 @@ cp .env.example server/.env
 | `JWT_ACCESS_SECRET`  | Secret for signing 7-day access tokens       |
 | `JWT_REFRESH_SECRET` | Secret for signing 30-day refresh tokens     |
 | `PORT`               | Server port (defaults to `3001`)             |
+| `GROQ_API_KEY`       | Groq key for the AI coach + Whisper voice (free at console.groq.com) |
 
 > Connecting to Hostinger MySQL: use the host, database, and user shown in
 > hPanel → Databases. Make sure your IP is allowed under "Remote MySQL", then
@@ -79,6 +80,8 @@ Migrations so far create:
   `trigger` (enum), `action` (enum), `note`, and a `context` JSON snapshot of the
   user's vulnerability at the moment (sleep, project intensity, hours since last
   meal, HRV, week count, consecutive high-stress days).
+- `ai_conversations` / `ai_messages` — AI coach chat history; conversations carry
+  an optional 2-sentence `summary` used as memory in later chats.
 
 ## Running locally
 
@@ -191,6 +194,30 @@ the user's timezone.
 | GET    | `/api/patterns/top-triggers?weeks=8`      | trigger frequency, ranked                          |
 | GET    | `/api/patterns/stress-cravings?weeks=6`   | cravings/day on high/crisis vs low/medium days     |
 
+## AI Coach API (Groq)
+
+Uses Groq's OpenAI-compatible API (`llama-3.3-70b-versatile`) and Whisper
+(`whisper-large-v3`). All `Authorization: Bearer`-gated. Needs `GROQ_API_KEY`;
+without it the chat/voice endpoints return `503`.
+
+| Method | Path                                         | Purpose                                  |
+| ------ | -------------------------------------------- | ---------------------------------------- |
+| POST   | `/api/coach/conversations`                   | start a conversation                     |
+| GET    | `/api/coach/conversations`                   | list conversations with summaries        |
+| GET    | `/api/coach/conversations/:id/messages`      | all messages of a conversation           |
+| POST   | `/api/coach/conversations/:id/messages`      | **SSE** stream of the assistant reply     |
+| POST   | `/api/coach/voice`                           | transcribe an audio blob (Whisper) → text |
+
+- `coachService.buildSystemPrompt(userId)` assembles a Spanish (Argentine)
+  Motivational-Interviewing persona and injects the user's real data: 4-week habit
+  hit rate, avg sleep, avg project stress, weight trend, last-20-cravings top
+  trigger/food/% managed, and habit variance. It forbids moralizing language
+  ("deberías", "tenés que", "no es saludable"), leads with empathy on slips, keeps
+  replies to 1–3 sentences, and uses `*italic*` sparingly for one key concept.
+- `chat()` streams from Groq, persisting the user and assistant messages; after
+  10+ messages it generates a 2-sentence `summary` (best-effort).
+- `GROQ_BASE_URL` can override the API origin (used to test against a mock).
+
 ## Front end
 
 - `/login` and `/register` — auth screens.
@@ -212,6 +239,10 @@ the user's timezone.
   highlighting the "hora roja"), a sleep-vs-craving-intensity bar chart, a weekly
   variance trend with a 0.15 goal line, and a stress×cravings comparison — each
   with commentary derived from the actual numbers.
+- `/app/coach` — **Coach**: streaming chat (user bubbles right/terra, assistant
+  left/surface with `*italic*` rendered as Fraunces emphasis), a mic button that
+  records audio and transcribes it into the input, a "Nueva" button, and a
+  conversations menu listing past summaries.
 - `/app/sueno` — **Sueño & Recuperación**: last night's sleep-stage breakdown,
   a 7-day sleep bar chart, and HRV / resting-HR trend lines (SVG, no chart lib).
 - `/app/tools` — **Tools**: placeholder for the 20-minute urge-surfing timer.

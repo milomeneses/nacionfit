@@ -135,6 +135,23 @@ export const cravings = mysqlTable('cravings', {
   context: json('context').$type<CravingContext>(),
 });
 
+export const aiConversations = mysqlTable('ai_conversations', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  startedAt: timestamp('started_at').notNull().defaultNow(),
+  lastMessageAt: timestamp('last_message_at').notNull().defaultNow(),
+  summary: text('summary'),
+});
+
+export const aiMessages = mysqlTable('ai_messages', {
+  id: int('id').autoincrement().primaryKey(),
+  conversationId: int('conversation_id').notNull(),
+  role: mysqlEnum('role', ['user', 'assistant', 'system']).notNull(),
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  tokensUsed: int('tokens_used'),
+});
+
 export type UserRow = typeof users.$inferSelect;
 export type NewUserRow = typeof users.$inferInsert;
 export type DailyLogRow = typeof dailyLogs.$inferSelect;
@@ -143,3 +160,5 @@ export type HealthDataRow = typeof healthData.$inferSelect;
 export type HealthDataInsert = typeof healthData.$inferInsert;
 export type WebhookTokenRow = typeof userWebhookTokens.$inferSelect;
 export type CravingRow = typeof cravings.$inferSelect;
+export type ConversationRow = typeof aiConversations.$inferSelect;
+export type MessageRow = typeof aiMessages.$inferSelect;

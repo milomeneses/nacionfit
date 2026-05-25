@@ -236,3 +236,25 @@ export interface StressCravings {
   high: StressCravingsGroup; // project_intensity high|crisis
   low: StressCravingsGroup; // low|medium
 }
+
+// ----- AI Coach -----
+
+export type CoachRole = 'user' | 'assistant' | 'system';
+
+export interface CoachMessage {
+  id: number;
+  role: CoachRole;
+  content: string;
+  createdAt: string;
+}
+
+export interface CoachConversation {
+  id: number;
+  startedAt: string;
+  lastMessageAt: string;
+  summary: string | null;
+}
+
+export interface VoiceTranscription {
+  text: string;
+}

@@ -23,4 +23,10 @@ export const env = {
     accessExpiresIn: '7d',
     refreshExpiresIn: '30d',
   },
+  groq: {
+    apiKey: process.env.GROQ_API_KEY ?? '',
+    baseUrl: process.env.GROQ_BASE_URL ?? 'https://api.groq.com/openai/v1',
+    chatModel: 'llama-3.3-70b-versatile',
+    whisperModel: 'whisper-large-v3',
+  },
 } as const;

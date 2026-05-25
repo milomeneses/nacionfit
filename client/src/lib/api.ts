@@ -2,6 +2,8 @@ import type {
   AuthResponse,
   Craving,
   CravingContext,
+  CoachConversation,
+  CoachMessage,
   CravingsHeatmap,
   CravingStats,
   CreateCravingRequest,
@@ -78,7 +80,7 @@ async function authFetch(path: string, init: RequestInit = {}): Promise<Response
     Authorization: `Bearer ${tokenStore.access ?? ''}`,
     ...(init.headers as Record<string, string> | undefined),
   };
-  if (init.body) headers['Content-Type'] = 'application/json';
+  if (init.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
   return fetch(path, { ...init, headers });
 }
 
@@ -191,4 +193,71 @@ export async function getStressCravings(weeks = 6): Promise<StressCravings> {
   const res = await authFetch(`/api/patterns/stress-cravings?weeks=${weeks}`);
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as StressCravings;
+}
+
+export async function listConversations(): Promise<CoachConversation[]> {
+  const res = await authFetch('/api/coach/conversations');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as CoachConversation[];
+}
+
+export async function createConversation(): Promise<CoachConversation> {
+  const res = await authFetch('/api/coach/conversations', { method: 'POST' });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as CoachConversation;
+}
+
+export async function getCoachMessages(id: number): Promise<CoachMessage[]> {
+  const res = await authFetch(`/api/coach/conversations/${id}/messages`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as CoachMessage[];
+}
+
+export async function transcribeVoice(blob: Blob): Promise<string> {
+  const res = await authFetch('/api/coach/voice', {
+    method: 'POST',
+    body: blob,
+    headers: { 'Content-Type': blob.type || 'audio/webm' },
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return ((await res.json()) as { text: string }).text;
+}
+
+/** POSTs a message and streams the assistant reply, calling onDelta per token. */
+export async function streamCoachMessage(
+  id: number,
+  content: string,
+  onDelta: (delta: string) => void,
+): Promise<void> {
+  const res = await authFetch(`/api/coach/conversations/${id}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ content }),
+  });
+  if (!res.ok || !res.body) throw new Error(await parseError(res));
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let idx: number;
+    while ((idx = buffer.indexOf('\n\n')) >= 0) {
+      const chunk = buffer.slice(0, idx);
+      buffer = buffer.slice(idx + 2);
+      const line = chunk.split('\n').find((l) => l.startsWith('data:'));
+      if (!line) continue;
+      const data = line.slice(5).trim();
+      if (!data) continue;
+      let evt: { delta?: string; error?: string };
+      try {
+        evt = JSON.parse(data);
+      } catch {
+        continue;
+      }
+      if (evt.error) throw new Error(evt.error);
+      if (evt.delta) onDelta(evt.delta);
+    }
+  }
 }
