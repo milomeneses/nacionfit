@@ -5,7 +5,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from 'react';
-import type { CoachConversation, CoachMessage } from '@mi-cocina/shared';
+import type { CoachConversation, CoachMessage } from '@nacionfit/shared';
 import {
   createConversation,
   getCoachMessages,

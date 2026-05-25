@@ -5,7 +5,7 @@ import type {
   StressCravings,
   TopTriggersResult,
   VarianceTrend,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 import {
   getCravingsHeatmap,
   getDays,

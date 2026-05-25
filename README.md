@@ -1,4 +1,4 @@
-# Mi Cocina
+# NacionFit
 
 A TypeScript monorepo with a React client, an Express API, and a shared types
 package. Includes JWT authentication backed by MySQL (via Drizzle ORM) and a

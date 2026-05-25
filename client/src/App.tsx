@@ -12,6 +12,11 @@ import { Patrones } from './pages/Patrones';
 import { Coach } from './pages/Coach';
 import { Reviews } from './pages/Reviews';
 import { Tools } from './pages/Tools';
+import { AdminLayout } from './components/AdminLayout';
+import { AdminUsers } from './pages/admin/AdminUsers';
+import { AdminUserDetail } from './pages/admin/AdminUserDetail';
+import { AdminMetrics } from './pages/admin/AdminMetrics';
+import { AdminAudit } from './pages/admin/AdminAudit';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -55,6 +60,13 @@ export default function App() {
         <Route path="reviews/:weekStart" element={<Reviews />} />
         <Route path="tools" element={<Tools />} />
         <Route path="settings" element={<Ajustes />} />
+      </Route>
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Navigate to="/admin/users" replace />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="users/:id" element={<AdminUserDetail />} />
+        <Route path="metrics" element={<AdminMetrics />} />
+        <Route path="audit" element={<AdminAudit />} />
       </Route>
       <Route path="*" element={<Navigate to="/app" replace />} />
     </Routes>

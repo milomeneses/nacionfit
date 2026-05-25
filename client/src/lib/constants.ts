@@ -1,4 +1,4 @@
-import type { HabitId, Meals, ProjectIntensity } from '@mi-cocina/shared';
+import type { HabitId, Meals, ProjectIntensity } from '@nacionfit/shared';
 
 export const HABITS: { id: HabitId; label: string }[] = [
   { id: 'meditacion', label: 'Meditación' },

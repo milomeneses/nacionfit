@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { AuthResponse, User } from '@mi-cocina/shared';
+import type { AuthResponse, User } from '@nacionfit/shared';
 import { fetchMe, tokenStore } from './api';
 
 interface AuthContextValue {

@@ -1,4 +1,4 @@
-/* Mi Cocina push service worker */
+/* NacionFit push service worker */
 self.addEventListener('push', (event) => {
   let data = {};
   try {
@@ -6,7 +6,7 @@ self.addEventListener('push', (event) => {
   } catch {
     data = {};
   }
-  const title = data.title || 'Mi Cocina';
+  const title = data.title || 'NacionFit';
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || '',

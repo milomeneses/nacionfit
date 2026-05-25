@@ -6,7 +6,7 @@ import type {
   ReviewInsight,
   WeeklyReview,
   WeeklyReviewData,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import {
   cravings,

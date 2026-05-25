@@ -1,5 +1,5 @@
 {
-  "name": "@mi-cocina/client",
+  "name": "@nacionfit/client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@mi-cocina/shared": "*",
+    "@nacionfit/shared": "*",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { WebhookTokenInfo } from '@mi-cocina/shared';
+import type { WebhookTokenInfo } from '@nacionfit/shared';
 import { getHealthToken, regenerateHealthToken } from '../lib/api';
 import { fmtDateTimeEs, webhookUrl } from '../lib/health';
 import { Card } from '../components/Card';

@@ -1,10 +1,19 @@
 import type {
+  AdminMetrics,
+  AdminUpdateUserInput,
+  AdminUserDetail,
+  AdminUserSummary,
+  AuditLogEntry,
   AuthResponse,
   Craving,
+  CravingAction,
   CravingContext,
+  CravingTrigger,
   CoachConversation,
   CoachMessage,
   CravingsHeatmap,
+  Meals,
+  ProjectIntensity,
   CravingStats,
   CreateCravingRequest,
   SleepVsCravings,
@@ -23,7 +32,7 @@ import type {
   WebhookTokenInfo,
   WeeklyReview,
   WeeklyReviewSummary,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 
 const ACCESS_KEY = 'mc.accessToken';
 const REFRESH_KEY = 'mc.refreshToken';
@@ -299,4 +308,120 @@ export async function streamCoachMessage(
       if (evt.delta) onDelta(evt.delta);
     }
   }
+}
+
+// ----- Admin -----
+
+export interface AdminDay {
+  id: number;
+  date: string;
+  meals: Meals | null;
+  waterCount: number | null;
+  sleepHours: number | null;
+  mood: number | null;
+  crossfit: boolean | null;
+  energy: number | null;
+  stress: number | null;
+  projectIntensity: ProjectIntensity | null;
+  weightKg: number | null;
+  savedAt: string | null;
+}
+
+export interface AdminCravingRow {
+  id: number;
+  timestamp: string;
+  food: string;
+  intensity: number;
+  trigger: CravingTrigger;
+  action: CravingAction;
+  note: string | null;
+}
+
+export interface AdminHealthRow {
+  id: number;
+  date: string;
+  sleepMinutes: number | null;
+  deepSleepMinutes: number | null;
+  remSleepMinutes: number | null;
+  hrvMs: number | null;
+  restingHr: number | null;
+  steps: number | null;
+}
+
+export async function getAdminUsers(): Promise<AdminUserSummary[]> {
+  const res = await authFetch('/api/admin/users');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AdminUserSummary[];
+}
+
+export async function getAdminUser(id: number): Promise<AdminUserDetail> {
+  const res = await authFetch(`/api/admin/users/${id}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AdminUserDetail;
+}
+
+export async function getAdminUserDays(id: number): Promise<AdminDay[]> {
+  const res = await authFetch(`/api/admin/users/${id}/days`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AdminDay[];
+}
+
+export async function getAdminUserCravings(id: number): Promise<AdminCravingRow[]> {
+  const res = await authFetch(`/api/admin/users/${id}/cravings`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AdminCravingRow[];
+}
+
+export async function getAdminUserHealth(id: number): Promise<AdminHealthRow[]> {
+  const res = await authFetch(`/api/admin/users/${id}/health`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AdminHealthRow[];
+}
+
+export async function patchAdminUser(id: number, body: AdminUpdateUserInput): Promise<User> {
+  const res = await authFetch(`/api/admin/users/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as User;
+}
+
+export async function deleteAdminUser(id: number, confirm: string): Promise<void> {
+  const res = await authFetch(`/api/admin/users/${id}`, {
+    method: 'DELETE',
+    body: JSON.stringify({ confirm }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function patchAdminDay(id: number, body: Partial<AdminDay>): Promise<AdminDay> {
+  const res = await authFetch(`/api/admin/days/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AdminDay;
+}
+
+export async function deleteAdminDay(id: number): Promise<void> {
+  const res = await authFetch(`/api/admin/days/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function deleteAdminCraving(id: number): Promise<void> {
+  const res = await authFetch(`/api/admin/cravings/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function getAdminMetrics(): Promise<AdminMetrics> {
+  const res = await authFetch('/api/admin/metrics');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AdminMetrics;
+}
+
+export async function getAdminAudit(): Promise<AuditLogEntry[]> {
+  const res = await authFetch('/api/admin/audit');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as AuditLogEntry[];
 }

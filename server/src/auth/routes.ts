@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import type {
   AuthResponse,
   User as PublicUser,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import { users, type UserRow } from '../db/schema.js';
 import {
@@ -36,7 +36,7 @@ const refreshSchema = z.object({
   refreshToken: z.string().min(1),
 });
 
-function toPublicUser(row: UserRow): PublicUser {
+export function toPublicUser(row: UserRow): PublicUser {
   const createdAt =
     row.createdAt instanceof Date
       ? row.createdAt.toISOString()
@@ -50,6 +50,7 @@ function toPublicUser(row: UserRow): PublicUser {
     targetWeightKg: row.targetWeightKg ?? null,
     targetDate: row.targetDate ?? null,
     timezone: row.timezone,
+    role: row.role,
     createdAt,
   };
 }

@@ -1,7 +1,7 @@
 import express, { Router, type Response } from 'express';
 import { z } from 'zod';
 import { and, asc, desc, eq } from 'drizzle-orm';
-import type { CoachConversation, CoachMessage } from '@mi-cocina/shared';
+import type { CoachConversation, CoachMessage } from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import { aiConversations, aiMessages } from '../db/schema.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';

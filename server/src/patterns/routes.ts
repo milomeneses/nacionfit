@@ -8,7 +8,7 @@ import type {
   TopTriggersResult,
   VarianceTrend,
   VarianceWeek,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import { cravings, dailyLogs, habitsLogs, healthData, users } from '../db/schema.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';

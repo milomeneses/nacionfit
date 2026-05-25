@@ -1,4 +1,4 @@
-import type { CravingAction, CravingTrigger } from '@mi-cocina/shared';
+import type { CravingAction, CravingTrigger } from '@nacionfit/shared';
 
 export const TRIGGER_OPTIONS: { value: CravingTrigger; label: string }[] = [
   { value: 'estres', label: 'Estrés' },

@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@mi-cocina/shared': fileURLToPath(
+      '@nacionfit/shared': fileURLToPath(
         new URL('../shared/src/index.ts', import.meta.url),
       ),
     },

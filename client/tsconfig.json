@@ -17,7 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "paths": {
-      "@mi-cocina/shared": ["../shared/src/index.ts"]
+      "@nacionfit/shared": ["../shared/src/index.ts"]
     }
   },
   "include": ["src"]

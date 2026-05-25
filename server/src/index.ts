@@ -12,6 +12,7 @@ import patternsRoutes from './patterns/routes.js';
 import coachRoutes from './coach/routes.js';
 import reviewRoutes from './review/routes.js';
 import pushRoutes from './review/pushRoutes.js';
+import adminRoutes from './admin/routes.js';
 import { startWeeklyReviewCron } from './review/cron.js';
 
 const app = express();
@@ -32,6 +33,7 @@ app.use('/api/patterns', patternsRoutes);
 app.use('/api/coach', coachRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/push', pushRoutes);
+app.use('/api/admin', adminRoutes);
 
 // In production, serve the built client and let React Router handle routing.
 // Must come AFTER all /api routes so the catch-all doesn't shadow them.
