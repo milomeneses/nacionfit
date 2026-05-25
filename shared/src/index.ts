@@ -1,4 +1,4 @@
-// Shared types between the Mi Cocina client and server.
+// Shared types between the NacionFit client and server.
 
 /** A user as exposed to clients — never includes the password hash. */
 export interface User {

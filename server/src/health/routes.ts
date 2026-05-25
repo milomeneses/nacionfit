@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { Router, type Request, type Response } from 'express';
 import { and, desc, eq, gte } from 'drizzle-orm';
-import type { HealthData, WebhookTokenInfo } from '@mi-cocina/shared';
+import type { HealthData, WebhookTokenInfo } from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import {
   healthData,

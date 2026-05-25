@@ -23,7 +23,7 @@ import type {
   WebhookTokenInfo,
   WeeklyReview,
   WeeklyReviewSummary,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 
 const ACCESS_KEY = 'mc.accessToken';
 const REFRESH_KEY = 'mc.refreshToken';

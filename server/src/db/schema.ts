@@ -23,7 +23,7 @@ import type {
   ReviewExperiment,
   ReviewInsight,
   WeeklyReviewData,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 
 export const PROJECT_INTENSITIES = ['low', 'medium', 'high', 'crisis'] as const;
 export const HABIT_IDS = [

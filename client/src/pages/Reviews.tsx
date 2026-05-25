@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { WeeklyReview, WeeklyReviewSummary } from '@mi-cocina/shared';
+import type { WeeklyReview, WeeklyReviewSummary } from '@nacionfit/shared';
 import {
   generateReview as apiGenerateReview,
   getReview,

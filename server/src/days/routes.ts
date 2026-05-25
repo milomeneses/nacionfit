@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express';
 import { z } from 'zod';
 import { and, eq, gte, lte } from 'drizzle-orm';
-import type { DailyLog, HabitId } from '@mi-cocina/shared';
+import type { DailyLog, HabitId } from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import {
   dailyLogs,

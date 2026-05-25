@@ -1,6 +1,6 @@
 import { Router, type Response } from 'express';
 import { and, desc, eq } from 'drizzle-orm';
-import type { WeeklyReviewSummary } from '@mi-cocina/shared';
+import type { WeeklyReviewSummary } from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import { weeklyReviews } from '../db/schema.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';

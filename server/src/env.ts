@@ -15,7 +15,7 @@ export const env = {
     port: Number(process.env.DB_PORT ?? 3306),
     user: required('DB_USER', 'root'),
     password: process.env.DB_PASSWORD ?? '',
-    database: required('DB_NAME', 'mi_cocina'),
+    database: required('DB_NAME', 'nacionfit'),
   },
   jwt: {
     accessSecret: required('JWT_ACCESS_SECRET', 'dev-access-secret'),
@@ -37,6 +37,6 @@ export const env = {
   vapid: {
     publicKey: process.env.VAPID_PUBLIC_KEY ?? '',
     privateKey: process.env.VAPID_PRIVATE_KEY ?? '',
-    subject: process.env.VAPID_SUBJECT ?? 'mailto:hola@mi-cocina.app',
+    subject: process.env.VAPID_SUBJECT ?? 'mailto:hola@nacionfit.app',
   },
 } as const;

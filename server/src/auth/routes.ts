@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import type {
   AuthResponse,
   User as PublicUser,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import { users, type UserRow } from '../db/schema.js';
 import {

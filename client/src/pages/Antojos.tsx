@@ -6,7 +6,7 @@ import type {
   CravingContext,
   CravingStats,
   CravingTrigger,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 import { createCraving, getCravingContext, getCravings, getCravingStats } from '../lib/api';
 import {
   ACTION_LABELS,

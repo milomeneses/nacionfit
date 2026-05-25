@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { HealthData } from '@mi-cocina/shared';
+import type { HealthData } from '@nacionfit/shared';
 import { getHealthMe } from '../lib/api';
 import { fmtSleep } from '../lib/health';
 import { Card } from '../components/Card';

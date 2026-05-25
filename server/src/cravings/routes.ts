@@ -6,7 +6,7 @@ import type {
   CravingAction,
   CravingStats,
   CravingTrigger,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import {
   cravings,

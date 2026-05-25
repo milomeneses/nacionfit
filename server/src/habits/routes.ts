@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express';
 import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
-import type { HabitId, HabitLog } from '@mi-cocina/shared';
+import type { HabitId, HabitLog } from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import { habitsLogs, HABIT_IDS } from '../db/schema.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';

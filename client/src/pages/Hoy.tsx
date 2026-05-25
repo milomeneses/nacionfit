@@ -6,7 +6,7 @@ import type {
   HealthData,
   Meals,
   ProjectIntensity,
-} from '@mi-cocina/shared';
+} from '@nacionfit/shared';
 import { getDay, getDays, getHealthMe, getReviews, putDay, toggleHabit } from '../lib/api';
 import { computeStreak, daysAgoStr, formatLongEs, todayStr } from '../lib/date';
 import { fmtSleep } from '../lib/health';

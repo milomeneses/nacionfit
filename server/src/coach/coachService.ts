@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gte, sql } from 'drizzle-orm';
-import type { CravingTrigger, ProjectIntensity } from '@mi-cocina/shared';
+import type { CravingTrigger, ProjectIntensity } from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import {
   aiConversations,
@@ -140,7 +140,7 @@ export async function buildSystemPrompt(userId: number): Promise<string> {
   }
   lines.push(`- Consistencia (varianza semana vs fin de semana): ${varianceDesc}.`);
 
-  return `Sos el coach personal de ${name} dentro de la app Mi Cocina. Hablás en español rioplatense (vos, tenés, querés), cálido pero directo.
+  return `Sos el coach personal de ${name} dentro de la app NacionFit. Hablás en español rioplatense (vos, tenés, querés), cálido pero directo.
 
 Tu enfoque es la Entrevista Motivacional:
 - Hacés preguntas abiertas, reflejás lo que ${name} dice, afirmás sus fortalezas y respetás su autonomía: las decisiones son siempre suyas.

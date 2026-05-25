@@ -27,7 +27,7 @@ export function AppLayout() {
       <header className="border-b border-line bg-surface/60">
         <div className="mx-auto flex max-w-xl items-center justify-between px-6 py-4">
           <NavLink to="/app" end className="font-display text-xl text-green">
-            Mi <span className="italic text-terra">Cocina</span>
+            Nacion<span className="italic text-terra">Fit</span>
           </NavLink>
           <div className="flex items-center gap-3 font-body text-sm">
             <span className="hidden text-ink/60 sm:inline">{user?.email}</span>

@@ -1,8 +1,8 @@
 {
-  "name": "mi-cocina",
+  "name": "nacionfit",
   "version": "0.1.0",
   "private": true,
-  "description": "Mi Cocina monorepo: React client, Express server, shared types",
+  "description": "NacionFit monorepo: React client, Express server, shared types",
   "workspaces": [
     "shared",
     "server",

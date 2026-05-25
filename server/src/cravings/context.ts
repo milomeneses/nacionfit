@@ -1,5 +1,5 @@
 import { and, eq, gte, sql } from 'drizzle-orm';
-import type { CravingContext, Meals, ProjectIntensity } from '@mi-cocina/shared';
+import type { CravingContext, Meals, ProjectIntensity } from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import { cravings, dailyLogs, healthData, users } from '../db/schema.js';
 
