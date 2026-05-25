@@ -67,7 +67,37 @@ export const habitsLogs = mysqlTable(
   (t) => [unique('habits_logs_user_date_habit_unique').on(t.userId, t.date, t.habitId)],
 );
 
+export const healthData = mysqlTable(
+  'health_data',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    userId: int('user_id').notNull(),
+    date: date('date', { mode: 'string' }).notNull(),
+    sleepMinutes: int('sleep_minutes'),
+    deepSleepMinutes: int('deep_sleep_minutes'),
+    remSleepMinutes: int('rem_sleep_minutes'),
+    awakeMinutes: int('awake_minutes'),
+    hrvMs: decimal('hrv_ms', { precision: 6, scale: 2 }),
+    restingHr: int('resting_hr'),
+    steps: int('steps'),
+    activeCalories: int('active_calories'),
+    source: varchar('source', { length: 40 }),
+    syncedAt: timestamp('synced_at').notNull().defaultNow(),
+  },
+  (t) => [unique('health_data_user_date_unique').on(t.userId, t.date)],
+);
+
+export const userWebhookTokens = mysqlTable('user_webhook_tokens', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  token: varchar('token', { length: 64 }).notNull().unique(),
+  lastSyncAt: timestamp('last_sync_at'),
+});
+
 export type UserRow = typeof users.$inferSelect;
 export type NewUserRow = typeof users.$inferInsert;
 export type DailyLogRow = typeof dailyLogs.$inferSelect;
 export type HabitLogRow = typeof habitsLogs.$inferSelect;
+export type HealthDataRow = typeof healthData.$inferSelect;
+export type HealthDataInsert = typeof healthData.$inferInsert;
+export type WebhookTokenRow = typeof userWebhookTokens.$inferSelect;

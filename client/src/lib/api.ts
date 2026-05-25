@@ -4,9 +4,11 @@ import type {
   DailyLogInput,
   HabitLog,
   HabitToggleRequest,
+  HealthData,
   LoginRequest,
   RegisterRequest,
   User,
+  WebhookTokenInfo,
 } from '@mi-cocina/shared';
 
 const ACCESS_KEY = 'mc.accessToken';
@@ -105,4 +107,22 @@ export async function toggleHabit(body: HabitToggleRequest): Promise<HabitLog> {
   });
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as HabitLog;
+}
+
+export async function getHealthMe(): Promise<HealthData[]> {
+  const res = await authFetch('/api/health/me');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as HealthData[];
+}
+
+export async function getHealthToken(): Promise<WebhookTokenInfo> {
+  const res = await authFetch('/api/health/token');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WebhookTokenInfo;
+}
+
+export async function regenerateHealthToken(): Promise<WebhookTokenInfo> {
+  const res = await authFetch('/api/health/token', { method: 'POST' });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as WebhookTokenInfo;
 }

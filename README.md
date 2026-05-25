@@ -71,6 +71,10 @@ Migrations so far create:
   (enum), `weight_kg`, `saved_at`, with `UNIQUE(user_id, date)`.
 - `habits_logs` — `habit_id` (enum) + `completed` per user/day, with
   `UNIQUE(user_id, date, habit_id)`.
+- `health_data` — Apple Health metrics per user/day: sleep (total/deep/rem/awake
+  minutes), `hrv_ms`, `resting_hr`, `steps`, `active_calories`, `source`,
+  `synced_at`, with `UNIQUE(user_id, date)`.
+- `user_webhook_tokens` — per-user secret `token` (UNIQUE) + `last_sync_at`.
 
 ## Running locally
 
@@ -124,20 +128,52 @@ user only. Dates are `YYYY-MM-DD`.
 - A day's response merges its `daily_logs` row with a `habits` map of all six
   habit ids → completed.
 
+## Apple Health API (Health Auto Export)
+
+Integrates with the iOS app **Health Auto Export — JSON+CSV** (paid, for
+automations) via a per-user webhook.
+
+| Method | Path                            | Auth            | Purpose                              |
+| ------ | ------------------------------- | --------------- | ------------------------------------ |
+| POST   | `/api/health/webhook/:token`    | URL token       | Ingest a Health Auto Export payload  |
+| GET    | `/api/health/me`                | Bearer          | Last 7 days of the user's metrics    |
+| GET    | `/api/health/token`             | Bearer          | Current webhook token (created lazily) |
+| POST   | `/api/health/token`             | Bearer          | Regenerate the token (old URL dies)  |
+
+The webhook accepts the app's JSON — either `{ data: { metrics: [...] } }` or a
+bare array of `{ name, data: [{ date, qty, source }] }`. Metric names are matched
+case/spacing-insensitively:
+
+- `Sleep Analysis` → sleep minutes (+ deep / rem / awake stages). Sleep that
+  crosses midnight is assigned to the **wake day** (`sleepEnd`'s date). Stage/
+  duration values ≤ 24 are treated as hours and converted to minutes.
+- `Heart Rate Variability` → `hrv_ms` (most recent sample of the day).
+- `Resting Heart Rate` → `resting_hr` (most recent of the day).
+- `Step Count` → `steps` (summed). `Active Energy` → `active_calories` (summed).
+
+Each day is upserted by `(user_id, date)`, **merging** only the fields present in
+the payload (a partial sync never wipes existing metrics).
+
 ## Front end
 
 - `/login` and `/register` — auth screens.
-- `/app` — the **"Hoy"** screen: today's daily log. Header shows the date in
-  Argentine Spanish and a streak counter; a tab bar (Hoy / Coach / Patrones /
-  Plan, only Hoy implemented) sits above the cards.
-- Cards: comidas (4 meals), agua (8-vaso picker), estrés (bajo/medio/alto/crisis),
-  ánimo (5 levels), CrossFit (reveals an energy 1–5 picker when on), peso (kg,
-  optional) and hábitos (6-item checklist).
-- Edits **auto-save 1s after the last change** (debounced) via `PUT /api/days/:date`;
-  habits toggle immediately via `POST /api/habits/toggle`. A subtle "Guardado"
-  indicator fades in on save.
+- `/app` — the **"Hoy"** screen: today's daily log. A persistent tab bar
+  (Hoy / Coach / Patrones / Plan / Sueño) and top bar (with an **Ajustes** link)
+  wrap every `/app` view. Hoy shows the Argentine-Spanish date, a streak counter,
+  an **Apple Watch** card (today's sleep / HRV / steps, or a prompt to connect),
+  then comidas, agua, estrés, ánimo, CrossFit (+energy), peso and hábitos cards.
+- `/app/sueno` — **Sueño & Recuperación**: last night's sleep-stage breakdown,
+  a 7-day sleep bar chart, and HRV / resting-HR trend lines (SVG, no chart lib).
+- `/app/settings` — **Ajustes**: the webhook URL with a copy button, last-sync
+  time, Health Auto Export setup steps, and a regenerate-token action.
+- Edits **auto-save 1s after the last change** (debounced); habits toggle
+  immediately. A subtle "Guardado" indicator fades in on save.
 - **Streak**: consecutive days back from today with `saved_at` set. An unsaved
   *today* does not break the streak (it's measured from yesterday in that case).
+
+The displayed webhook URL uses `VITE_API_PUBLIC_URL` (the public origin of your
+API; defaults to `https://api.tu-dominio.com`). Set it for the client build, e.g.
+`VITE_API_PUBLIC_URL=https://api.midominio.com npm run build --workspace client`.
 
 Tokens are stored in `localStorage`; on load the app calls `/api/auth/me` to
 restore the session.

@@ -15,6 +15,13 @@
       "when": 1779720286868,
       "tag": "0001_sloppy_night_nurse",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1779721218425,
+      "tag": "0002_noisy_vision",
+      "breakpoints": true
     }
   ]
 }

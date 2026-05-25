@@ -105,3 +105,24 @@ export interface HabitLog {
   habitId: HabitId;
   completed: boolean;
 }
+
+// ----- Apple Health integration -----
+
+export interface HealthData {
+  date: string; // YYYY-MM-DD (the wake day)
+  sleepMinutes: number | null;
+  deepSleepMinutes: number | null;
+  remSleepMinutes: number | null;
+  awakeMinutes: number | null;
+  hrvMs: number | null;
+  restingHr: number | null;
+  steps: number | null;
+  activeCalories: number | null;
+  source: string | null;
+  syncedAt: string | null; // ISO timestamp
+}
+
+export interface WebhookTokenInfo {
+  token: string;
+  lastSyncAt: string | null;
+}
