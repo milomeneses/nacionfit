@@ -8,9 +8,24 @@ import {
   dailyLogs,
   habitsLogs,
   healthData,
+  hydrationLogs,
+  supplementLogs,
+  supplements,
+  trainingBlocks,
   users,
+  workouts,
 } from '../db/schema.js';
 import { complete, streamChat, type ChatMessage } from './groq.js';
+import { addDays, mondayOf } from '../util/dates.js';
+import { parseSlot, parseStructure } from '../training/recommend.js';
+
+const FOCUS_LABELS: Record<string, string> = {
+  hypertrophy: 'hipertrofia',
+  strength: 'fuerza',
+  cut: 'definición',
+  recomp: 'recomposición',
+  maintenance: 'mantenimiento',
+};
 
 const TRIGGER_LABELS: Record<CravingTrigger, string> = {
   estres: 'estrés',
@@ -140,6 +155,8 @@ export async function buildSystemPrompt(userId: number): Promise<string> {
   }
   lines.push(`- Consistencia (varianza semana vs fin de semana): ${varianceDesc}.`);
 
+  for (const l of await describeTraining(userId, user?.timezone ?? 'UTC')) lines.push(l);
+
   return `Sos el coach personal de ${name} dentro de la app NacionFit. Hablás en español rioplatense (vos, tenés, querés), cálido pero directo.
 
 Tu enfoque es la Entrevista Motivacional:
@@ -157,6 +174,100 @@ DATOS DE ${name} (últimas 4 semanas salvo que se indique):
 ${lines.join('\n')}
 
 Respondé siempre como el coach, en primera persona, sin encabezados ni listas salvo que ayuden de verdad.`;
+}
+
+async function describeTraining(userId: number, tz: string): Promise<string[]> {
+  const today = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+  const monday = mondayOf(today);
+  const out: string[] = [];
+
+  const [block] = await db
+    .select()
+    .from(trainingBlocks)
+    .where(eq(trainingBlocks.userId, userId))
+    .orderBy(desc(trainingBlocks.startDate))
+    .limit(1);
+  if (!block) return ['- Entrenamiento: todavía no configuró un plan.'];
+
+  out.push(
+    `- Plan activo: "${block.name}", foco ${FOCUS_LABELS[block.focus] ?? block.focus}.`,
+  );
+
+  // This week's workout completion
+  const structure = parseStructure(block.weeklyStructure);
+  const plannedDays = Object.values(structure).filter((s) => {
+    const t = parseSlot(s).type;
+    return t === 'crossfit' || t === 'strength' || t === 'cardio';
+  }).length;
+  const weekWorkouts = await db
+    .select({ type: workouts.type, rpe: workouts.rpe, completedAt: workouts.completedAt, date: workouts.date })
+    .from(workouts)
+    .where(and(eq(workouts.userId, userId), gte(workouts.date, monday)));
+  const completed = weekWorkouts.filter(
+    (w) => w.completedAt != null && (w.type === 'crossfit' || w.type === 'strength' || w.type === 'cardio'),
+  ).length;
+  out.push(`- Esta semana entrenó ${completed} de ${plannedDays} sesiones previstas.`);
+
+  // Yesterday's RPE
+  const yesterday = addDays(today, -1);
+  const [yWorkout] = await db
+    .select({ rpe: workouts.rpe, type: workouts.type })
+    .from(workouts)
+    .where(and(eq(workouts.userId, userId), eq(workouts.date, yesterday)))
+    .orderBy(desc(workouts.id))
+    .limit(1);
+  if (yWorkout?.rpe != null) out.push(`- RPE de ayer: ${yWorkout.rpe}/10.`);
+
+  // Supplement adherence this week
+  const [{ active }] = await db
+    .select({ active: sql<number>`count(*)` })
+    .from(supplements)
+    .where(and(eq(supplements.userId, userId), eq(supplements.active, true)));
+  const takenLogs = await db
+    .select({ id: supplementLogs.id })
+    .from(supplementLogs)
+    .where(
+      and(eq(supplementLogs.userId, userId), gte(supplementLogs.date, monday), eq(supplementLogs.taken, true)),
+    );
+  const daysElapsed = Math.max(1, Math.round((Date.parse(today) - Date.parse(monday)) / 86_400_000) + 1);
+  const expected = Number(active) * daysElapsed;
+  if (expected > 0) {
+    out.push(`- Adherencia a suplementos esta semana: ~${Math.round((takenLogs.length / expected) * 100)}%.`);
+  }
+
+  // Hydration last 7 days
+  const hydra = await db
+    .select({ target: hydrationLogs.targetMl, consumed: hydrationLogs.consumedMl })
+    .from(hydrationLogs)
+    .where(and(eq(hydrationLogs.userId, userId), gte(hydrationLogs.date, addDays(today, -7))));
+  const hydraPcts = hydra
+    .filter((h) => h.target != null && h.target > 0)
+    .map((h) => h.consumed / (h.target as number));
+  if (hydraPcts.length > 0) {
+    const avg = Math.round((hydraPcts.reduce((a, b) => a + b, 0) / hydraPcts.length) * 100);
+    out.push(`- Hidratación: viene cumpliendo ~${avg}% de su objetivo diario.`);
+  }
+
+  // Recovery last 7 days
+  const recovery = await db
+    .select({ sleep: healthData.sleepMinutes, hrv: healthData.hrvMs })
+    .from(healthData)
+    .where(and(eq(healthData.userId, userId), gte(healthData.date, addDays(today, -7))));
+  const sleeps = recovery.map((r) => r.sleep).filter((x): x is number => x != null);
+  const hrvs = recovery.map((r) => (r.hrv != null ? Number(r.hrv) : null)).filter((x): x is number => x != null);
+  if (sleeps.length || hrvs.length) {
+    const parts: string[] = [];
+    if (sleeps.length) parts.push(`sueño ~${(sleeps.reduce((a, b) => a + b, 0) / sleeps.length / 60).toFixed(1)}h`);
+    if (hrvs.length) parts.push(`HRV ~${Math.round(hrvs.reduce((a, b) => a + b, 0) / hrvs.length)}ms`);
+    out.push(`- Recuperación (últimos 7 días): ${parts.join(', ')}.`);
+  }
+
+  return out;
 }
 
 async function describeVariance(userId: number): Promise<string> {

@@ -370,3 +370,173 @@ export interface AuditLogEntry {
   payload: unknown;
   createdAt: string;
 }
+
+// ----- Training -----
+
+export type TrainingFocus =
+  | 'hypertrophy'
+  | 'strength'
+  | 'cut'
+  | 'recomp'
+  | 'maintenance';
+
+export type WorkoutType =
+  | 'crossfit'
+  | 'strength'
+  | 'cardio'
+  | 'mobility'
+  | 'rest'
+  | 'rest_active'
+  | 'other';
+
+export type WorkoutSource = 'app_planned' | 'app_logged' | 'apple_watch_sync';
+
+export type WeekDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+
+export type WeeklyStructure = Partial<Record<WeekDay, string>>;
+
+export interface TrainingBlock {
+  id: number;
+  name: string;
+  startDate: string | null;
+  endDate: string | null;
+  focus: TrainingFocus;
+  weeklyStructure: WeeklyStructure;
+}
+
+export interface CreateTrainingBlockInput {
+  name: string;
+  focus: TrainingFocus;
+  startDate?: string | null;
+  endDate?: string | null;
+  weeklyStructure: WeeklyStructure;
+}
+
+export interface Workout {
+  id: number;
+  date: string;
+  type: WorkoutType;
+  plannedAt: string | null;
+  completedAt: string | null;
+  durationMinutes: number | null;
+  rpe: number | null;
+  notes: string | null;
+  source: WorkoutSource;
+  workoutData: unknown;
+}
+
+export interface CreateWorkoutInput {
+  date: string;
+  type: WorkoutType;
+  durationMinutes?: number | null;
+  rpe?: number | null;
+  notes?: string | null;
+  workoutData?: unknown;
+}
+
+export type WorkoutStatus = 'pending' | 'in_progress' | 'completed';
+
+/** Today's suggested workout — suggestive, never prescriptive. */
+export interface ProposedWorkout {
+  date: string;
+  weekday: WeekDay;
+  type: WorkoutType;
+  label: string; // e.g. "CrossFit + upper body"
+  reasoning: string; // the warm, suggestive explanation
+  adjusted: boolean; // recovery changed it from the plan slot
+  status: WorkoutStatus;
+  workoutId: number | null;
+}
+
+export interface TrainingPlanResponse {
+  block: TrainingBlock | null;
+  week: { day: WeekDay; label: string; date: string }[];
+}
+
+// ----- Supplements -----
+
+export type SupplementTiming =
+  | 'morning'
+  | 'pre_workout'
+  | 'post_workout'
+  | 'with_lunch'
+  | 'with_dinner'
+  | 'before_bed'
+  | 'flexible';
+
+export type SupplementFrequency = 'daily' | 'training_days_only' | 'specific_days';
+
+export interface Supplement {
+  id: number;
+  name: string;
+  brand: string | null;
+  dose: string;
+  timing: SupplementTiming;
+  frequency: SupplementFrequency;
+  specificDays: WeekDay[] | null;
+  active: boolean;
+  startedAt: string | null;
+  notes: string | null;
+}
+
+export interface CreateSupplementInput {
+  name: string;
+  brand?: string | null;
+  dose: string;
+  timing: SupplementTiming;
+  frequency: SupplementFrequency;
+  specificDays?: WeekDay[] | null;
+  notes?: string | null;
+}
+
+export interface SupplementDoseToday {
+  supplement: Supplement;
+  taken: boolean;
+  takenAt: string | null;
+}
+
+// ----- Hydration -----
+
+export type DrinkSource = 'water' | 'coffee' | 'tea' | 'mate' | 'other';
+
+export interface HydrationEntry {
+  time: string;
+  amountMl: number; // already-counted volume (coffee/tea/mate counted at 80%)
+  source: DrinkSource;
+}
+
+export interface HydrationToday {
+  date: string;
+  targetMl: number;
+  consumedMl: number;
+  entries: HydrationEntry[];
+  bonuses: { label: string; ml: number }[];
+}
+
+// ----- Mobility -----
+
+export interface MobilityExercise {
+  name: string;
+  durationSec?: number;
+  reps?: number;
+  notes?: string;
+}
+
+export interface MobilityRoutine {
+  id: number;
+  name: string;
+  durationMinutes: number;
+  exercises: MobilityExercise[];
+}
+
+// ----- Weekly training recap -----
+
+export interface TrainingWeekRecap {
+  workoutsCompleted: number;
+  workoutsPlanned: number;
+  avgRpe: number | null;
+  mobilityMinutes: number;
+  hydrationDaysHit: number;
+  hydrationDaysTotal: number;
+  supplementAdherencePct: number; // 0-100
+}
