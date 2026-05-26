@@ -11,6 +11,7 @@ import {
 } from '../db/schema.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { parseHealthExport, type DayMetrics } from './parse.js';
+import { syncWorkouts } from './workoutSync.js';
 
 const router = Router();
 
@@ -75,12 +76,14 @@ router.post('/webhook/:token', async (req: Request, res: Response) => {
       .onDuplicateKeyUpdate({ set: { ...columns, syncedAt: now } });
   }
 
+  const workoutsSynced = await syncWorkouts(userId, req.body);
+
   await db
     .update(userWebhookTokens)
     .set({ lastSyncAt: now })
     .where(eq(userWebhookTokens.id, tokenRow.id));
 
-  res.json({ ok: true, daysUpdated: days.size });
+  res.json({ ok: true, daysUpdated: days.size, workoutsSynced });
 });
 
 // GET /api/health/me — last 7 days of the current user's health data.

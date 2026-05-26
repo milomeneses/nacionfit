@@ -8,6 +8,7 @@ import { Hoy } from './pages/Hoy';
 import { Sueno } from './pages/Sueno';
 import { Ajustes } from './pages/Ajustes';
 import { Antojos } from './pages/Antojos';
+import { Entreno } from './pages/Entreno';
 import { Patrones } from './pages/Patrones';
 import { Coach } from './pages/Coach';
 import { Reviews } from './pages/Reviews';
@@ -52,6 +53,7 @@ export default function App() {
         }
       >
         <Route index element={<Hoy />} />
+        <Route path="entreno" element={<Entreno />} />
         <Route path="antojos" element={<Antojos />} />
         <Route path="patrones" element={<Patrones />} />
         <Route path="sueno" element={<Sueno />} />

@@ -32,6 +32,16 @@ import type {
   WebhookTokenInfo,
   WeeklyReview,
   WeeklyReviewSummary,
+  CreateWorkoutInput,
+  DrinkSource,
+  HydrationToday,
+  MobilityRoutine,
+  ProposedWorkout,
+  Supplement,
+  SupplementDoseToday,
+  TrainingPlanResponse,
+  TrainingWeekRecap,
+  Workout,
 } from '@nacionfit/shared';
 
 const ACCESS_KEY = 'mc.accessToken';
@@ -424,4 +434,79 @@ export async function getAdminAudit(): Promise<AuditLogEntry[]> {
   const res = await authFetch('/api/admin/audit');
   if (!res.ok) throw new Error(await parseError(res));
   return (await res.json()) as AuditLogEntry[];
+}
+
+// ----- Training / Supplements / Hydration / Mobility -----
+
+export async function getTrainingPlan(): Promise<TrainingPlanResponse> {
+  const res = await authFetch('/api/training/plan');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as TrainingPlanResponse;
+}
+
+export async function getTrainingToday(): Promise<ProposedWorkout> {
+  const res = await authFetch('/api/training/today');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as ProposedWorkout;
+}
+
+export async function getTrainingRecap(): Promise<TrainingWeekRecap> {
+  const res = await authFetch('/api/training/recap');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as TrainingWeekRecap;
+}
+
+export async function logWorkout(input: CreateWorkoutInput): Promise<Workout> {
+  const res = await authFetch('/api/workouts', { method: 'POST', body: JSON.stringify(input) });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Workout;
+}
+
+export async function getSupplementsToday(): Promise<SupplementDoseToday[]> {
+  const res = await authFetch('/api/supplements/today');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as SupplementDoseToday[];
+}
+
+export async function getSupplements(): Promise<Supplement[]> {
+  const res = await authFetch('/api/supplements');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as Supplement[];
+}
+
+export async function logSupplement(supplementId: number, taken: boolean): Promise<void> {
+  const res = await authFetch('/api/supplements/log', {
+    method: 'POST',
+    body: JSON.stringify({ supplementId, taken }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function getHydrationToday(): Promise<HydrationToday> {
+  const res = await authFetch('/api/hydration/today');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as HydrationToday;
+}
+
+export async function logHydration(amountMl: number, source: DrinkSource): Promise<HydrationToday> {
+  const res = await authFetch('/api/hydration/log', {
+    method: 'POST',
+    body: JSON.stringify({ amountMl, source }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as HydrationToday;
+}
+
+export async function getMobilityRoutines(): Promise<MobilityRoutine[]> {
+  const res = await authFetch('/api/mobility/routines');
+  if (!res.ok) throw new Error(await parseError(res));
+  return (await res.json()) as MobilityRoutine[];
+}
+
+export async function logMobility(routineId: number): Promise<void> {
+  const res = await authFetch('/api/mobility/log', {
+    method: 'POST',
+    body: JSON.stringify({ routineId }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
 }

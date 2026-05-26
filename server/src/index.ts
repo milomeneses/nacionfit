@@ -13,6 +13,10 @@ import coachRoutes from './coach/routes.js';
 import reviewRoutes from './review/routes.js';
 import pushRoutes from './review/pushRoutes.js';
 import adminRoutes from './admin/routes.js';
+import { trainingRouter, workoutsRouter } from './training/routes.js';
+import supplementsRoutes from './supplements/routes.js';
+import hydrationRoutes from './hydration/routes.js';
+import mobilityRoutes from './mobility/routes.js';
 import { startWeeklyReviewCron } from './review/cron.js';
 
 const app = express();
@@ -34,6 +38,11 @@ app.use('/api/coach', coachRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/push', pushRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/training', trainingRouter);
+app.use('/api/workouts', workoutsRouter);
+app.use('/api/supplements', supplementsRoutes);
+app.use('/api/hydration', hydrationRoutes);
+app.use('/api/mobility', mobilityRoutes);
 
 // In production, serve the built client and let React Router handle routing.
 // Must come AFTER all /api routes so the catch-all doesn't shadow them.

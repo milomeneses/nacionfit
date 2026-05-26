@@ -8,6 +8,7 @@ import type {
 } from '@nacionfit/shared';
 import { db } from '../db/index.js';
 import { users, type UserRow } from '../db/schema.js';
+import { seedUserDefaults } from '../training/defaults.js';
 import {
   signAccessToken,
   signRefreshToken,
@@ -105,6 +106,9 @@ router.post('/register', async (req, res: Response) => {
     res.status(500).json({ error: 'Failed to create user' });
     return;
   }
+
+  // Seed starter training block, mobility routines and supplement suggestions.
+  await seedUserDefaults(created.id).catch(() => {});
 
   res.status(201).json(issueTokens(created));
 });

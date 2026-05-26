@@ -18,10 +18,14 @@ import type {
   CravingContext,
   CravingTrigger,
   HabitId,
+  HydrationEntry,
   Meals,
+  MobilityExercise,
   ProjectIntensity,
   ReviewExperiment,
   ReviewInsight,
+  WeekDay,
+  WeeklyStructure,
   WeeklyReviewData,
 } from '@nacionfit/shared';
 
@@ -192,8 +196,96 @@ export const pushSubscriptions = mysqlTable('push_subscriptions', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
+export const TRAINING_FOCUSES = ['hypertrophy', 'strength', 'cut', 'recomp', 'maintenance'] as const;
+export const WORKOUT_TYPES = ['crossfit', 'strength', 'cardio', 'mobility', 'rest', 'rest_active', 'other'] as const;
+export const WORKOUT_SOURCES = ['app_planned', 'app_logged', 'apple_watch_sync'] as const;
+export const SUPPLEMENT_TIMINGS = ['morning', 'pre_workout', 'post_workout', 'with_lunch', 'with_dinner', 'before_bed', 'flexible'] as const;
+export const SUPPLEMENT_FREQUENCIES = ['daily', 'training_days_only', 'specific_days'] as const;
+
+export const trainingBlocks = mysqlTable('training_blocks', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  name: varchar('name', { length: 120 }).notNull(),
+  startDate: date('start_date', { mode: 'string' }),
+  endDate: date('end_date', { mode: 'string' }),
+  focus: mysqlEnum('focus', TRAINING_FOCUSES).notNull(),
+  weeklyStructure: json('weekly_structure').$type<WeeklyStructure>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const workouts = mysqlTable('workouts', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  date: date('date', { mode: 'string' }).notNull(),
+  type: mysqlEnum('type', WORKOUT_TYPES).notNull(),
+  plannedAt: datetime('planned_at', { mode: 'date' }),
+  completedAt: datetime('completed_at', { mode: 'date' }),
+  durationMinutes: int('duration_minutes'),
+  rpe: tinyint('rpe'),
+  notes: text('notes'),
+  source: mysqlEnum('source', WORKOUT_SOURCES).notNull(),
+  appleWorkoutId: varchar('apple_workout_id', { length: 64 }),
+  workoutData: json('workout_data'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const supplements = mysqlTable('supplements', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  name: varchar('name', { length: 80 }).notNull(),
+  brand: varchar('brand', { length: 80 }),
+  dose: varchar('dose', { length: 40 }).notNull(),
+  timing: mysqlEnum('timing', SUPPLEMENT_TIMINGS).notNull(),
+  frequency: mysqlEnum('frequency', SUPPLEMENT_FREQUENCIES).notNull(),
+  specificDays: json('specific_days').$type<WeekDay[]>(),
+  active: boolean('active').notNull().default(true),
+  startedAt: date('started_at', { mode: 'string' }),
+  notes: text('notes'),
+});
+
+export const supplementLogs = mysqlTable(
+  'supplement_logs',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    userId: int('user_id').notNull(),
+    supplementId: int('supplement_id').notNull(),
+    date: date('date', { mode: 'string' }).notNull(),
+    taken: boolean('taken').notNull().default(false),
+    takenAt: datetime('taken_at', { mode: 'date' }),
+  },
+  (t) => [unique('supplement_logs_unique').on(t.userId, t.supplementId, t.date)],
+);
+
+export const hydrationLogs = mysqlTable(
+  'hydration_logs',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    userId: int('user_id').notNull(),
+    date: date('date', { mode: 'string' }).notNull(),
+    targetMl: int('target_ml'),
+    consumedMl: int('consumed_ml').notNull().default(0),
+    entries: json('entries').$type<HydrationEntry[]>(),
+  },
+  (t) => [unique('hydration_logs_user_date_unique').on(t.userId, t.date)],
+);
+
+export const mobilityRoutines = mysqlTable('mobility_routines', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  name: varchar('name', { length: 120 }).notNull(),
+  durationMinutes: int('duration_minutes').notNull(),
+  exercises: json('exercises').$type<MobilityExercise[]>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 export type UserRow = typeof users.$inferSelect;
 export type NewUserRow = typeof users.$inferInsert;
+export type TrainingBlockRow = typeof trainingBlocks.$inferSelect;
+export type WorkoutRow = typeof workouts.$inferSelect;
+export type SupplementRow = typeof supplements.$inferSelect;
+export type SupplementLogRow = typeof supplementLogs.$inferSelect;
+export type HydrationLogRow = typeof hydrationLogs.$inferSelect;
+export type MobilityRoutineRow = typeof mobilityRoutines.$inferSelect;
 export type DailyLogRow = typeof dailyLogs.$inferSelect;
 export type HabitLogRow = typeof habitsLogs.$inferSelect;
 export type HealthDataRow = typeof healthData.$inferSelect;

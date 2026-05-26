@@ -87,6 +87,19 @@ Migrations so far create:
 - `weekly_reviews` — one Gemini-generated review per user/week: `narrative`,
   `insights` JSON, `experiment` JSON, `raw_data` JSON snapshot, `read_at`.
 - `push_subscriptions` — Web Push (VAPID) subscriptions per user/device.
+- `training_blocks` — multi-week plan with a JSON weekly day-by-day structure
+  and a `focus` (hypertrophy/strength/cut/recomp/maintenance).
+- `workouts` — sessions logged by the user, proposed by the app, or synced from
+  Apple Watch (`apple_workout_id` dedup); `type`, `rpe`, `duration`, `workout_data`.
+- `supplements` / `supplement_logs` — the user's stack (timing, frequency,
+  `active` soft-delete) and per-day taken records.
+- `hydration_logs` — per-day dynamic target + consumed ml + per-drink entries
+  (`daily_logs.water_count` kept for backwards compatibility).
+- `mobility_routines` — reusable stretch/recovery sequences (exercises JSON).
+
+> On Hostinger the `tsx` migration runner has permission issues — paste
+> `docs/0007_training_tables.sql` into phpMyAdmin to create these tables. New
+> users get starter training/mobility/supplement data seeded automatically.
 
 ## Running locally
 
